@@ -5,8 +5,9 @@
 #
 
 use v5.10;
-use strict;
 use DBI;
+use strict;
+use File::Copy;
 
 ##################################################################
 
@@ -55,8 +56,10 @@ sub convertDB2DB {
     my ($defaultDB, $defaultTable, $createSQL, $dropSQL) = @_;
     
     my $newdb = $defaultDB;
-    $newdb =~ s/^/CC/g;
+    $newdb =~ s/^/AA/g;
     
+    copy ($defaultDB, $newdb) or die "copy $defaultDB to $newdb failed";
+
     if ($debug) {
         say $newdb;
     }
