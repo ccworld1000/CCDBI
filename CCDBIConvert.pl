@@ -10,14 +10,25 @@ use DBI;
 
 ##################################################################
 
-my @driver_names = DBI->available_drivers;
-my $dbnames = join (" ", @driver_names);
+# check is Support SQLite
 
-if (!($dbnames =~ m/SQLite/i)) {
-	die "You must support DBD for SQLite";
+sub supportSQLite {
+    my $isSupportSQLite = 0;
+    
+    my @driver_names = DBI->available_drivers;
+    my $dbnames = join (" ", @driver_names);
+
+    if (!($dbnames =~ m/SQLite/i)) {
+        warn "You must support DBD for SQLite";
+        $isSupportSQLite = 0;
+    } else {
+        $isSupportSQLite = 1;
+    }
+
+    say "Support dbnames => [$dbnames]";
+    
+    $isSupportSQLite;
 }
-
-say "DBD dbnames => [$dbnames]";
 
 ##################################################################
 
@@ -124,3 +135,5 @@ sub convertDB2DB {
 }
 
 ##################################################################
+
+1;
