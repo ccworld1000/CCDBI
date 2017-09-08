@@ -2,7 +2,7 @@
 #
 #  Created by CC on 2017/09/05.
 #  Copyright © 2017 - now  CC | ccworld1000@gmail.com . All rights reserved.
-#
+#  https://github.com/ccworld1000/CCDBI
 
 use v5.10;
 use DBI;
@@ -48,7 +48,7 @@ sub convertDB2DB {
         say q{arg error: need 4 args ($defaultDB, $defaultTable, $createSQL, $dropSQL)};
     }
     
-    my $debug = 1;
+    my $debug = 0;
     if ($debug) {
         say "Right Args $argCount count";
     }
@@ -66,6 +66,11 @@ sub convertDB2DB {
     
     my %attr = (
         RaiseError => 1,
+	HandleError => sub {
+		my $error = shift;
+		say "[CC Error] : $error";
+		return 1;
+	},
     );
     
     my $empty = "";
@@ -94,12 +99,14 @@ sub convertDB2DB {
     my $content;
     
     my $usMarkType = qq (222222);
-    my $ukMarkType = qq (111111);
+    my $hkMarkType = qq (111111);
     
     my $insertSQL;
     
     my $count = 0;
     
+    my $now = time();
+    $newDBH->begin_work();
     while (@row = $sth->fetchrow_array()) {
         if ($debug) {
             $content = join ("\t", @row);
@@ -113,7 +120,7 @@ sub convertDB2DB {
             $markType = $usMarkType;
             $pureCode = $code;
         } elsif ($dataType =~ m/^1{1,}/) {
-            $markType = $ukMarkType;
+            $markType = $hkMarkType;
             $pureCode =~ s/\.hk//gi;
         }
         
@@ -130,7 +137,12 @@ sub convertDB2DB {
         $count++;
     }
     
-    say "Convert $count count OK!";
+    $newDBH->commit ();
+    
+    my $lastTime = time();
+    my $delta = $lastTime - $now;
+
+    say "Convert $count count OK! [$delta s]";
     
     $sth->finish ();
     $dbh->disconnect();
